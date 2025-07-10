@@ -1,0 +1,18 @@
+{
+  # Global options block.  
+  # Enable env‐variable substitution.
+  # (Caddy v2+ does this by default in Docker)
+}
+
+# serve on your Railway domain or custom domain
+:80, :443 {
+  # Proxy /api to your Elysia service
+  @api path_regexp api ^/api/(.*)$
+  reverse_proxy @api {env.API_URL}/{http.regexp.api.1}
+
+  # All other traffic → SvelteKit frontend
+  reverse_proxy {env.FRONTEND_URL}
+
+  # Optional: strip _/static_ or _/build_ prefixes, etc.
+  # you can add headers, timeouts, etc. here if you like
+}
