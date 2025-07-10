@@ -5,7 +5,7 @@
     }
     
     # API route - proxy to API_URL
-    handle /api/* {
+    handle_path /api/* {
         reverse_proxy {$API_URL} {
             header_up Host {upstream_hostport}
             header_up X-Real-IP {remote_host}
@@ -14,7 +14,7 @@
         }
     }
     
-    # Main route - proxy to MAIN_URL (catch-all)
+    # Main route - proxy to MAIN_URL (everything else)
     handle {
         reverse_proxy {$MAIN_URL} {
             header_up Host {upstream_hostport}
