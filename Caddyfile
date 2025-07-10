@@ -1,26 +1,26 @@
-:{$PORT:8080}
-
-# API route - proxy to API_URL
-/api/* {
-    reverse_proxy {$API_URL} {
-        header_up Host {upstream_hostport}
-        header_up X-Real-IP {remote_host}
-        header_up X-Forwarded-For {remote_host}
-        header_up X-Forwarded-Proto {scheme}
+:{$PORT:8080} {
+    # Health check endpoint
+    handle /health {
+        respond "OK" 200
     }
-}
-
-# Main route - proxy to MAIN_URL
-/* {
-    reverse_proxy {$MAIN_URL} {
-        header_up Host {upstream_hostport}
-        header_up X-Real-IP {remote_host}
-        header_up X-Forwarded-For {remote_host}
-        header_up X-Forwarded-Proto {scheme}
+    
+    # API route - proxy to API_URL
+    handle /api/* {
+        reverse_proxy {$API_URL} {
+            header_up Host {upstream_hostport}
+            header_up X-Real-IP {remote_host}
+            header_up X-Forwarded-For {remote_host}
+            header_up X-Forwarded-Proto {scheme}
+        }
     }
-}
-
-# Health check endpoint
-/health {
-    respond "OK" 200
+    
+    # Main route - proxy to MAIN_URL (catch-all)
+    handle {
+        reverse_proxy {$MAIN_URL} {
+            header_up Host {upstream_hostport}
+            header_up X-Real-IP {remote_host}
+            header_up X-Forwarded-For {remote_host}
+            header_up X-Forwarded-Proto {scheme}
+        }
+    }
 }
