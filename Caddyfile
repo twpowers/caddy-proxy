@@ -1,14 +1,26 @@
-{
-  # Don’t try to manage HTTPS inside the container,
-  # let Railway’s edge do that:
-  auto_https off
+:{$PORT:8080}
+
+# API route - proxy to API_URL
+/api/* {
+    reverse_proxy {$API_URL} {
+        header_up Host {upstream_hostport}
+        header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-For {remote_host}
+        header_up X-Forwarded-Proto {scheme}
+    }
 }
 
-# only listen on HTTP/80 in‐container
-:80 {
-  @api path_regexp api ^/api/(.*)$
-  reverse_proxy @api {env.API_URL}/{http.regexp.api.1}
+# Main route - proxy to MAIN_URL
+/* {
+    reverse_proxy {$MAIN_URL} {
+        header_up Host {upstream_hostport}
+        header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-For {remote_host}
+        header_up X-Forwarded-Proto {scheme}
+    }
+}
 
-  # all other requests → frontend
-  reverse_proxy {env.FRONTEND_URL}
+# Health check endpoint
+/health {
+    respond "OK" 200
 }
